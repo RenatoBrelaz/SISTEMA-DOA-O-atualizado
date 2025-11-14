@@ -39,8 +39,6 @@ $stmt->close();
     <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo" >
     <nav class="main-nav">
         <a href="dashboard.php">Home</a>
-        <a href="cadastro-doacao.php">Cadastrar Novo Item</a>
-        <a href="minhas-doacoes.php" class="active">Minhas Doações</a>
         <a href="logout.php">Sair</a>
     </nav>
 </header>
@@ -51,6 +49,7 @@ $stmt->close();
 
     <div class="tabs-nav">
         <button class="tab-button active" data-tab="ativos">Itens Ativos</button>
+        <button class="tab-button" data-tab="solicitacoes">Solicitações Recebidas</button>
         <button class="tab-button" data-tab="historico">Histórico</button>
     </div>
 
@@ -100,6 +99,62 @@ $stmt->close();
             </table>
         <?php endif; ?>
     </section>
+
+<!-- ABA DE SOLICITAÇÕES -->
+<section id="solicitacoes" class="tab-content" style="display:none;">
+    <h2>Solicitações Recebidas</h2>
+    <?php
+    $sql_solic = "SELECT s.id, s.status, s.data_solicitacao, s.observacoes,
+                         i.nome_item, u.nome AS nome_beneficiario
+                  FROM solicitacoes s
+                  JOIN itens i ON s.id_item = i.id
+                  JOIN usuarios u ON s.id_beneficiario = u.id
+                  WHERE i.id_doador = ?
+                  ORDER BY s.data_solicitacao DESC";
+    $stmt_solic = $conexao->prepare($sql_solic);
+    $stmt_solic->bind_param("i", $id_doador);
+    $stmt_solic->execute();
+    $res_solic = $stmt_solic->get_result();
+    ?>
+    <?php if ($res_solic->num_rows > 0): ?>
+        <table class="doacoes-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Beneficiário</th>
+                    <th>Mensagem</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($s = $res_solic->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($s['nome_item']) ?></td>
+                        <td><?= htmlspecialchars($s['nome_beneficiario']) ?></td>
+                        <td><?= htmlspecialchars($s['observacoes'] ?: 'Nenhuma mensagem.') ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($s['data_solicitacao'])) ?></td>
+                        <td><span class="status-<?= $s['status'] ?>"><?= ucfirst($s['status']) ?></span></td>
+                        <td>
+                            <?php if ($s['status'] === 'pendente'): ?>
+                                <a href="atualizar-solicitacao.php?id=<?= $s['id'] ?>&acao=aprovar" class="btn-approve">✅ Aprovar</a>
+                                <a href="atualizar-solicitacao.php?id=<?= $s['id'] ?>&acao=recusar" class="btn-reject">❌ Recusar</a>
+                            <?php elseif ($s['status'] === 'aprovado'): ?>
+                                <a href="atualizar-solicitacao.php?id=<?= $s['id'] ?>&acao=finalizar" class="btn-finish">📦 Finalizar</a>
+                            <?php else: ?>
+                                —
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p class="empty-state">Nenhuma solicitação recebida até o momento.</p>
+    <?php endif; ?>
+</section>
+
 
     <!-- ABA DE HISTÓRICO -->
     <section id="historico" class="tab-content" style="display:none;">

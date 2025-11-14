@@ -10,6 +10,20 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_perfil'] !== 'doador')
 $id_doador = $_SESSION['usuario_id'];
 $mensagem = "";
 
+$sql_endereco = "SELECT endereco FROM usuarios WHERE id = ?";
+$stmt_end = $conexao->prepare($sql_endereco);
+
+if (!$stmt_end) {
+    die("Erro ao preparar SQL de endereço: " . $conexao->error);
+}
+
+$stmt_end->bind_param("i", $id_doador);
+$stmt_end->execute();
+$result_end = $stmt_end->get_result();
+$endereco_doador = $result_end->fetch_assoc();
+$stmt_end->close();
+
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $nome_item = trim($_POST['nomeItem'] ?? '');
     $descricao = trim($_POST['descricao'] ?? '');
@@ -83,8 +97,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo" >
     <nav class="main-nav">
         <a href="dashboard.php">Home</a>
-        <a href="cadastro-doacao.php">Cadastrar Novo Item</a>
-        <a href="minhas-doacoes.php">Minhas Doações</a>
         <a href="logout.php">Sair</a>
     </nav>
     </nav>
@@ -112,32 +124,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <label for="categoria">Categoria *</label>
                 <select id="categoria" name="categoria" required>
                     <option value="">Selecione</option>
-                    <option value="roupas">Roupas e Acessórios</option>
+                    <option value="roupas">Roupas</option>
                     <option value="calcados">Calçados</option>
-                    <option value="alimentos">Alimentos</option>
+                    <option value="alimentos">Alimentos Não Perecíveis</option>
                     <option value="moveis">Móveis</option>
                     <option value="eletrodomesticos">Eletrodomésticos</option>
-                    <option value="outros">Outros</option>
                 </select>
             </div>
 
             <div class="form-control">
                 <label for="quantidade">Quantidade *</label>
-                <input type="number" id="quantidade" name="quantidade" min="1" value="1" required>
+                <input type="number" id="quantidade" name="quantidade"  required>
             </div>
         </fieldset>
 
         <fieldset class="form-group">
-            <legend>Estado e Descrição</legend>
-
+            <legend>Concervação e Descrição</legend>
             <div class="radio-group">
                 <input type="radio" id="estado-novo" name="estadoConservacao" value="novo" required>
-                <label for="estado-novo">Novo</label>
+                <label for="estado-novo">Novo/Lacrado</label>
 
                 <input type="radio" id="estado-usado" name="estadoConservacao" value="usado">
                 <label for="estado-usado">Usado</label>
             </div>
-
+<br>
             <div class="form-control">
                 <label for="descricao">Descrição</label>
                 <textarea id="descricao" name="descricao" rows="4"></textarea>
@@ -149,25 +159,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
         </fieldset>
 
+
         <fieldset class="form-group">
-            <legend>Endereço de Coleta</legend>
+    <legend>Endereço de Coleta</legend>
 
-            <div class="form-control">
-                <label>Selecione o endereço:</label>
-                <div class="radio-group">
-                    <input type="radio" id="endereco-cadastrado" name="enderecoColeta" value="principal" checked>
-                    <label for="endereco-cadastrado">Usar endereço cadastrado</label>
-                    
-                    <input type="radio" id="endereco-novo" name="enderecoColeta" value="novo">
-                    <label for="endereco-novo">Informar novo endereço</label>
-                </div>
-            </div>
+    <div class="form-control">
+        <label>Selecione o endereço:</label>
+        <div class="radio-group">
+            <input type="radio" id="endereco-cadastrado" name="enderecoColeta" value="principal" checked>
+            <label for="endereco-cadastrado">Usar endereço cadastrado</label>
+            
+            <input type="radio" id="endereco-novo" name="enderecoColeta" value="novo">
+            <label for="endereco-novo">Informar novo endereço</label>
+        </div>
+    </div>
 
-            <div class="form-control" id="novo-endereco-fields" style="display:none;">
-                <label for="cep">CEP do novo endereço</label>
-                <input type="text" id="cep" name="cepNovo" placeholder="00000-000">
-            </div>
-        </fieldset>
+    <!-- Endereço do doador -->
+    <div id="endereco-principal" class="endereco-box">
+    <p><strong>Endereço cadastrado:</strong></p>
+    <p><?= htmlspecialchars($endereco_doador['endereco'] ?? 'Endereço não informado') ?></p>
+</div>
+
+
+    <!-- Novo endereço -->
+    <div id="novo-endereco-fields" class="form-grid" style="display:none;">
+        <div class="form-control">
+            <label for="cep">CEP *</label>
+            <input type="text" id="cep" name="cepNovo" placeholder="00000-000" maxlength="9" required>
+        </div>
+
+        <div class="form-control">
+            <label for="rua">Rua *</label>
+            <input type="text" id="rua" name="ruaNovo">
+        </div>
+
+        <div class="form-control">
+            <label for="numero">Número *</label>
+            <input type="text" id="numero" name="numeroNovo">
+        </div>
+
+        <div class="form-control">
+            <label for="bairro">Bairro *</label>
+            <input type="text" id="bairro" name="bairroNovo">
+        </div>
+
+        <div class="form-control">
+            <label for="cidade">Cidade *</label>
+            <input type="text" id="cidade" name="cidadeNovo">
+        </div>
+
+        <div class="form-control">
+            <label for="estado">Estado *</label>
+            <input type="text" id="estado" name="estadoNovo" maxlength="2">
+        </div>
+    </div>
+</fieldset>
+
 
         <div class="form-actions">
             <button type="submit" class="submit-button primary-button">✅ Confirmar Doação</button>
@@ -179,14 +226,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <p>&copy; 2025 DONATION. Todos os direitos reservados.</p>
 </footer>
 
-<script>
-document.querySelectorAll('input[name="enderecoColeta"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        const novoEndereco = document.getElementById('novo-endereco-fields');
-        novoEndereco.style.display = (radio.value === 'novo') ? 'block' : 'none';
-    });
-});
-</script>
+<script src="cadastro-doacao.js"></script>
 
 </body>
 </html>

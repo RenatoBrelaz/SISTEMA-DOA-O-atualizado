@@ -31,7 +31,7 @@ function prepare_or_die($conexao, $sql, $context = '') {
 /* ---------------------------------------------------------
    1) Total de itens cadastrados (campo id_ong em itens)
    --------------------------------------------------------- */
-$sql_itens = "SELECT COUNT(*) AS total_itens FROM itens WHERE id_ong = ?";
+$sql_itens = "SELECT COUNT(*) AS total_itens FROM itens WHERE id_doador = ?";
 $stmt_itens = prepare_or_die($conexao, $sql_itens, 'total_itens');
 $stmt_itens->bind_param("i", $id_doador);
 $stmt_itens->execute();
@@ -45,7 +45,7 @@ $stmt_itens->close();
 $sql_pendentes = "SELECT COUNT(*) AS pendentes
                   FROM solicitacoes s
                   JOIN itens i ON s.id_item = i.id
-                  WHERE i.id_ong = ? AND s.status = 'pendente'";
+                  WHERE i.id_doador = ? AND s.status = 'pendente'";
 $stmt_pendentes = prepare_or_die($conexao, $sql_pendentes, 'pendentes_solicitacoes');
 $stmt_pendentes->bind_param("i", $id_doador);
 $stmt_pendentes->execute();
@@ -61,7 +61,7 @@ $stmt_pendentes->close();
    FROM avaliacoes a
    JOIN solicitacoes s ON a.id_solicitacao = s.id
    JOIN itens i ON s.id_item = i.id
-   WHERE i.id_ong = ?";
+   WHERE i.id_doador = ?";
 $stmt_media = prepare_or_die($conexao, $sql_media, 'media_avaliacao');
 $stmt_media->bind_param("i", $id_doador);
 $stmt_media->execute();
@@ -78,7 +78,7 @@ $sql_notificacoes = "SELECT s.id, s.status, s.data_solicitacao, i.nome_item, u.n
                      FROM solicitacoes s
                      JOIN itens i ON s.id_item = i.id
                      JOIN usuarios u ON s.id_beneficiario = u.id
-                     WHERE i.id_ong = ?
+                     WHERE i.id_doador = ?
                      ORDER BY s.data_solicitacao DESC
                      LIMIT 3";
 $stmt_notificacoes = prepare_or_die($conexao, $sql_notificacoes, 'ultimas_solicitacoes');
@@ -103,8 +103,6 @@ $stmt_notificacoes->close();
     <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo">
     <nav class="main-nav">
         <a href="dashboard.php">Home</a>
-        <a href="cadastro-doacao.php">Cadastrar Novo Item</a>
-        <a href="minhas-doacoes.php">Minhas Doações</a>
         <a href="logout.php">Sair</a>
     </nav>
 </header>

@@ -48,7 +48,7 @@ if (isset($_POST['email']) && isset($_POST['senha']) && isset($_POST['perfil']))
                     } elseif ($usuario['perfil'] == 'beneficiario') {
                         header("Location: dashboard-beneficiario.php");
                     } elseif ($usuario['perfil'] == 'ong') {
-                        header("Location: dashboard-ong.php");
+                        header("Location: painel-ong.php");
                     }
                     exit;
                 } else {
@@ -80,8 +80,6 @@ if (isset($_POST['email']) && isset($_POST['senha']) && isset($_POST['perfil']))
         </a>
         
         <nav class="main-nav">
-            <a href="index.html" class="btn-primary">Home</a>
-            <a href="cadastro.php" class="btn-primary">Cadaste-se</a>
         </nav>
     </header>
     <main class="form-container" style="max-width: 450px;">
@@ -125,7 +123,7 @@ if (isset($_POST['email']) && isset($_POST['senha']) && isset($_POST['perfil']))
             
             <div style="text-align: center; margin-top: 1.5rem; font-size: 0.95rem;">
                 <p>
-                    <a href="recuperar-senha.html" class="link-more">Esqueci minha senha</a>
+                    <a href="recuperar-senha.php" class="link-more">Esqueci minha senha</a>
                 </p>
                 <p style="margin-top: 0.8rem;">
                     Ainda não tem conta? <a href="cadastro.php" class="link-more">Cadastre-se aqui</a>.

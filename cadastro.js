@@ -1,5 +1,8 @@
 // cadastro.js
 
+console.log("JS carregado");
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector(".cadastro-form");
     const cpfCnpjInput = document.getElementById("cpf_cnpj");
@@ -83,4 +86,130 @@ document.addEventListener("DOMContentLoaded", () => {
         // Tudo certo
         console.log("Formulário validado com sucesso!");
     });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("JS carregado");
+
+  const form = document.querySelector(".cadastro-form");
+  const cpfCnpjInput = document.getElementById("cpf_cnpj");
+  const telefoneInput = document.getElementById("telefone");
+  const senhaInput = document.getElementById("senha");
+  const confirmaSenhaInput = document.getElementById("confirma-senha");
+  const emailInput = document.getElementById("email");
+
+  const cepInput = document.getElementById("cep");
+  const ruaInput = document.getElementById("rua");
+  const bairroInput = document.getElementById("bairro");
+  const cidadeInput = document.getElementById("cidade");
+  const estadoInput = document.getElementById("estado");
+  const paisInput = document.getElementById("pais");
+
+  const cepMessage = document.createElement("small");
+  cepMessage.style.display = "block";
+  cepMessage.style.marginTop = "5px";
+  cepMessage.style.color = "blue";
+  cepInput.parentNode.appendChild(cepMessage);
+
+  let debounceTimer;
+
+  cpfCnpjInput.addEventListener("input", () => {
+      let value = cpfCnpjInput.value.replace(/\D/g, "");
+      if (value.length <= 11) {
+          value = value.replace(/(\d{3})(\d)/, "$1.$2");
+          value = value.replace(/(\d{3})(\d)/, "$1.$2");
+          value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+      } else {
+          value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+          value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+          value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+          value = value.replace(/(\d{4})(\d)/, "$1-$2");
+      }
+      cpfCnpjInput.value = value;
+  });
+
+  telefoneInput.addEventListener("input", () => {
+      let value = telefoneInput.value.replace(/\D/g, "");
+      if (value.length > 11) value = value.slice(0, 11);
+      if (value.length > 10) {
+          telefoneInput.value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+      } else if (value.length > 5) {
+          telefoneInput.value = value.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+      } else if (value.length > 2) {
+          telefoneInput.value = value.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+      } else {
+          telefoneInput.value = value.replace(/^(\d*)$/, "($1");
+      }
+  });
+
+  cepInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      let cep = cepInput.value.replace(/\D/g, '');
+      if (cep.length < 8) {
+          cepMessage.textContent = "";
+          return;
+      }
+      debounceTimer = setTimeout(() => {
+          fetch(`https://viacep.com.br/ws/${cep}/json/`)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.erro) {
+                      cepMessage.style.color = "red";
+                      cepMessage.textContent = "CEP não encontrado!";
+                      limparEndereco();
+                      return;
+                  }
+                  cepMessage.style.color = "green";
+                  cepMessage.textContent = "Endereço encontrado!";
+                  ruaInput.value = data.logradouro || '';
+                  bairroInput.value = data.bairro || '';
+                  cidadeInput.value = data.localidade || '';
+                  estadoInput.value = data.uf || '';
+                  paisInput.value = 'Brasil';
+              })
+              .catch(() => {
+                  cepMessage.style.color = "red";
+                  cepMessage.textContent = "Erro ao consultar o CEP.";
+                  limparEndereco();
+              });
+      }, 500);
+  });
+
+  function limparEndereco() {
+      ruaInput.value = '';
+      bairroInput.value = '';
+      cidadeInput.value = '';
+      estadoInput.value = '';
+      paisInput.value = '';
+  }
+
+  form.addEventListener("submit", (e) => {
+      const senha = senhaInput.value.trim();
+      const confirmaSenha = confirmaSenhaInput.value.trim();
+      const email = emailInput.value.trim();
+      const perfilSelecionado = document.querySelector('input[name="perfil"]:checked');
+
+      if (!perfilSelecionado) {
+          e.preventDefault();
+          alert("Selecione um tipo de cadastro (Doador, Beneficiário ou ONG).");
+          return;
+      }
+
+      if (senha !== confirmaSenha) {
+          e.preventDefault();
+          alert("As senhas não coincidem. Verifique e tente novamente.");
+          confirmaSenhaInput.focus();
+          return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+          e.preventDefault();
+          alert("Por favor, insira um e-mail válido.");
+          emailInput.focus();
+          return;
+      }
+
+      console.log("Formulário validado com sucesso!");
+  });
 });

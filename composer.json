@@ -1,0 +1,17 @@
+{
+    "name": "usurio/donation",
+    "autoload": {
+        "psr-4": {
+            "Usurio\\Donation\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Renato Brelaz",
+            "email": "renatoesteujr@gmail.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    }
+}

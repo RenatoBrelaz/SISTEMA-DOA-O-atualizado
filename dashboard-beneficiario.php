@@ -14,21 +14,13 @@ if ($_SESSION['usuario_perfil'] != 'beneficiario') {
     exit;
 }
 
-// =====================================
-// ESTATÍSTICAS DO BENEFICIÁRIO
-// =====================================
-
-// Se a conexão estiver com outro nome ($conexao), normaliza:
 if (!isset($conn) && isset($conexao)) {
     $conn = $conexao;
 }
 
-// Inicializa variáveis para evitar warnings
 $total_recebidos = 0;
 $total_pendentes = 0;
 $total_aguardando = 0;
-
-// ID do beneficiário logado
 $id_beneficiario = (int) $_SESSION['usuario_id'];
 
 // Executa consultas se conexão existir
@@ -58,10 +50,6 @@ if (isset($conn) && $conn) {
         $total_aguardando = $row ? $row['total_aguardando'] : 0;
     }
 }
-
-// =====================================
-// ÚLTIMAS SOLICITAÇÕES DO BENEFICIÁRIO
-// =====================================
 
 $ultimas_solicitacoes = [];
 
@@ -96,7 +84,6 @@ if (isset($conn) && $conn) {
         <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo" >
         <nav class="main-nav">
         <a href="dashboard-beneficiario.php" >Home</a>
-        <a href="catalogo-itens.php">Buscar Itens</a>
         <a href="gerenciar-solicitacoes.php">Minhas Solicitações</a>
         <a href="logout.php">Sair</a>
         </nav>

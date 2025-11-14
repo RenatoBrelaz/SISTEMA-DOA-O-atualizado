@@ -11,7 +11,8 @@ $id_beneficiario = $_SESSION['usuario_id']; // aqui está a correção
 
 $sql = "SELECT s.*, 
                i.nome_item AS nome_item, 
-               d.nome AS nome_doador, 
+               d.nome AS nome_doador,
+               d.telefone AS telefone_doador, 
                u.nome AS nome_ong, 
                u.telefone AS telefone_ong
         FROM solicitacoes s
@@ -58,7 +59,6 @@ while ($row = $result->fetch_assoc()) {
     <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo" >
         <nav class="main-nav">
         <a href="dashboard-beneficiario.php">Home</a>
-        <a href="catalogo-itens.php">Buscar Itens</a>
         <a href="gerenciar-solicitacoes.php">Minhas Solicitações</a>
         <a href="logout.php">Sair</a>
         </nav>
@@ -66,6 +66,10 @@ while ($row = $result->fetch_assoc()) {
 
     <main class="management-container">
         <h1>Minhas Solicitações de Itens</h1>
+        <?php if (isset($_GET['msg']) && $_GET['msg'] === 'cancelada'): ?>
+    <div class="alert success">✅ Solicitação cancelada com sucesso.</div>
+<?php endif; ?>
+
         <p>Acompanhe o status e realize a confirmação de recebimento dos itens solicitados.</p>
     
         <div class="tabs-nav">
@@ -91,8 +95,9 @@ while ($row = $result->fetch_assoc()) {
                 <?php if ($sol['status'] == 'pendente'): ?>
                     <p class="log-message">Aguarde o contato da ONG para agendar a entrega.</p>
                     <div class="card-actions">
-                        <button class="btn-details">Ver Detalhes</button>
-                        <button class="btn-cancel secondary-button">Cancelar Solicitação</button>
+                        <button class="btn-primary cancelar-recebimento">Ver Detalhes</button>
+                        <a href="cancelar-solicitacao.php?id=<?= $sol['id'] ?>"class="btn-cancel secondary-button"onclick="return confirm('Tem certeza que deseja cancelar esta solicitação?');">
+                            Cancelar Solicitação</a>
                     </div>
                 <?php elseif ($sol['status'] == 'aprovado'): ?>
                     <p><strong>Status:</strong> Entrega agendada.</p>

@@ -18,12 +18,15 @@ if (!$id_item || !is_numeric($id_item)) {
 }
 
 // 3️⃣ Busca os detalhes do item e o nome do doador
-$sql = "SELECT i.*, u.nome AS nome_doador 
+$sql = "SELECT i.*, u.nome AS nome_doador, u.endereco AS endereco_doador
         FROM itens i
         INNER JOIN usuarios u ON i.id_doador = u.id
-        WHERE i.id = ? AND i.id_ong IS NULL"; // Busca item específico e verifica se está disponível (id_ong é NULL)
+        WHERE i.id = ? AND i.id_ong IS NULL";
 
 $stmt = $conexao->prepare($sql);
+if (!$stmt) {
+    die("Erro na preparação da query: " . $conexao->error);
+}
 $stmt->bind_param("i", $id_item);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -57,7 +60,6 @@ function formatarCategoria($cat) {
     <img src="img/donation (2) (1).png" alt="Logo Donation" class="logo">
     <nav class="main-nav">
         <a href="dashboard-beneficiario.php">Home</a>
-        <a href="catalogo-itens.php">Buscar Itens</a>
         <a href="gerenciar-solicitacoes.php">Minhas Solicitações</a>
         <a href="logout.php">Sair</a>
     </nav>
@@ -94,7 +96,7 @@ function formatarCategoria($cat) {
                 <p><strong>Quantidade:</strong> <?= htmlspecialchars($item['quantidade']) ?> unidade(s)</p>
                 <p><strong>Doador:</strong> <?= htmlspecialchars($item['nome_doador']) ?></p>
                 <p><strong>Observações do Doador:</strong> "<?= htmlspecialchars($item['descricao'] ?? 'Nenhuma observação.') ?>"</p>
-                <p><strong>Localização Aproximada:</strong> Perto do doador (A ser revelado pela ONG).</p>
+                <p><strong>Localização:</strong> <?= htmlspecialchars($item['endereco_doador'] ?? 'Endereço não informado') ?></p>
             </div>
             
             <hr>
@@ -103,7 +105,7 @@ function formatarCategoria($cat) {
             
             <form action="solicitar-doacao.php" method="POST" class="solicitacao-form">
                 
-                <p class="solicitacao-text">Ao clicar em "Solicitar Doação", seus dados de contato cadastrados serão enviados à ONG responsável para que ela possa agendar a entrega (RF05).</p>
+                <p class="solicitacao-text">Ao clicar em "Solicitar Doação", seus dados de contato cadastrados serão enviados à ONG responsável para que ela possa agendar a entrega.</p>
                 
                 <input type="hidden" name="id_item" value="<?= htmlspecialchars($item['id']) ?>">
                 <input type="hidden" name="id_beneficiario" value="<?= htmlspecialchars($id_beneficiario) ?>">
@@ -114,12 +116,12 @@ function formatarCategoria($cat) {
                 </div>
                 
                 <button type="submit" class="btn-primary large-button">
-                    Solicitar Doação (RF05)
+                    Solicitar
                 </button>
             </form>
             
             <div class="alert-info" style="margin-top: 15px;">
-                <p>⚠️ **Atenção:** A solicitação está sujeita à aprovação da ONG, que avaliará a necessidade e a logística.</p>
+                <p>⚠️ **Atenção:** A solicitação está sujeita à aprovação do responsável, que avaliará a necessidade e a logística.</p>
             </div>
         </div>
         
